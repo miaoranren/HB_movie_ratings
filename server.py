@@ -25,16 +25,72 @@ def index():
     return render_template("homepage.html")
 
 
-@app.route('/register_form')
+@app.route('/register', methods=['GET'])
 def register_form():
 
     return render_template("register_form.html")
 
 
-# @app.route('/register', methods=['GET'])
-# def register():
+@app.route('/register', methods=['POST'])
+def register():
 
-#     return 
+    user_email = request.form.get('email')
+    user_password = request.form.get('password')
+    user_age = request.form.get('age')
+    user_zipcode = request.form.get('zipcode')
+
+    email_list = db.session.query(User.email).all()
+    for email in email_list:
+
+        if user_email == email[0]:
+            flash("The email has been used to register.")
+            return redirect('/')
+        
+    user = User(email=user_email, 
+                password=user_password, 
+                age=user_age, 
+                zipcode=user_zipcode)
+
+    db.session.add(user)
+
+    db.session.commit()
+
+    return redirect('/')
+
+
+@app.route('/login', methods=['GET'])
+def login_form():
+
+    return render_template("login_form.html")
+
+
+@app.route('/login', methods=['POST'])
+def login():
+
+    user_email = request.form.get('email')
+    user_password = request.form.get('password')
+
+    user = db.session.query(User).filter(User.email == user_email).first()
+
+    if not user:
+        flash("No such user.")
+        return redirect('/login')
+
+    if user_password != user.password:
+        flash("Incorrect password.")
+        return redirect('/login')
+    else:
+        flash("Logged in.")
+        session['user_id'] = user.user_id
+        return redirect('/')
+
+
+@app.route('/logout')
+def logout():
+    del session['user_id']
+    flash("Logged Out.")
+    return redirect('/')
+
 
 @app.route("/users")
 def user_list():
