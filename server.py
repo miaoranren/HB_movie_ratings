@@ -82,7 +82,7 @@ def login():
     else:
         flash("Logged in.")
         session['user_id'] = user.user_id
-        return redirect('/')
+        return redirect(f"/user/{user.user_id}")
 
 
 @app.route('/logout')
@@ -98,6 +98,47 @@ def user_list():
 
     users = User.query.all()
     return render_template("user_list.html", users=users)
+
+
+@app.route('/user/<int:user_id>')
+def user_info(user_id):
+    user = User.query.get(user_id)
+
+    # movies_id_list = db.session.query(Rating).filter(Rating.user_id == user_id).all()
+
+    # movie_title_list = []
+    # for movie in movies_id_list:
+    #     movie_title = db.session.query(Movie.title).filter(Movie.movie_id == movie.movie_id).first()
+    #     movie_title_list.append(movie_title[0])
+
+    return render_template("user-info.html", user=user)
+
+@app.route('/movies')
+def display_movie():
+
+    movie_list = db.session.query(Movie).order_by(Movie.title).all()
+    return render_template('movie_list.html', movie_list=movie_list)
+
+
+@app.route('/movie_detail/<int:movie_id>')
+def movie_detail(movie_id):
+
+    movie = db.session.query(Movie).get(movie_id)
+
+    return render_template('movie_detail.html', movie=movie)
+
+
+@app.route('/update_rating', methods=['POST'])
+def update_rating():
+
+    score = request.form.get('ratings')
+    movie_id = request.form.get('movie_id')
+
+    if 'user_id' in session:
+        user_id = session['user_id']
+
+
+    return redirect(f'/movie_detail/{movie_id}')
 
 
 if __name__ == "__main__":
