@@ -137,6 +137,16 @@ def update_rating():
     if 'user_id' in session:
         user_id = session['user_id']
 
+    rating = Rating.query.filter((Rating.user_id == user_id) & (Rating.movie_id == movie_id)).first()
+
+    if rating:
+        rating.score = score
+
+    else:
+        new_rating = Rating(movie_id=movie_id, user_id=user_id ,score=score)
+        db.session.add(new_rating)
+    
+    db.session.commit()
 
     return redirect(f'/movie_detail/{movie_id}')
 
